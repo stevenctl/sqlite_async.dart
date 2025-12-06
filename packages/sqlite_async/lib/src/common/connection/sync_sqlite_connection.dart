@@ -143,7 +143,13 @@ final class _UnsafeSyncContext extends UnscopedContext {
       [List<Object?> parameters = const []]) async {
     return task.timeSync(
       'execute',
-      () => db.select(sql, parameters),
+      () {
+        if (parameters.isNotEmpty) {
+          return db.select(sql, parameters);
+        }
+        db.execute(sql);
+        return ResultSet([], [], []);
+      },
       sql: sql,
       parameters: parameters,
     );

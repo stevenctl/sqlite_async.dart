@@ -264,6 +264,15 @@ final class _UnscopedContext extends UnscopedContext {
   Future<ResultSet> execute(String sql, [List<Object?> parameters = const []]) {
     return _task.timeAsync('execute', sql: sql, parameters: parameters, () {
       return wrapSqliteException(() async {
+        if (parameters.isEmpty) {
+          // use execute instead of select to allow multi-statement execution.
+          await _database._database.execute(
+            sql,
+            token: _lock,
+            checkInTransaction: _checkInTransaction,
+          );
+          return ResultSet([], [], []);
+        }
         final result = await _database._database.select(
           sql,
           parameters: parameters,

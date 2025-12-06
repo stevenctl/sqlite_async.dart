@@ -195,7 +195,13 @@ final class _UnsafeContext extends UnscopedContext {
   @override
   Future<sqlite.ResultSet> execute(String sql,
       [List<Object?> parameters = const []]) async {
-    return getAll(sql, parameters);
+    if (parameters.isNotEmpty) {
+      return getAll(sql, parameters);
+    }
+    return await computeWithDatabase((db) async {
+      db.execute(sql);
+      return sqlite.ResultSet([], [], []);
+    });
   }
 
   @override
